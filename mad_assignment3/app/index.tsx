@@ -1,43 +1,75 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Button, Text } from 'react-native';
+import { StyleSheet, View, Button, Text, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 
 
-export default function VideoScreen() {
+export default function VideoRecord() {
+
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [permission, requestPermission] = useCameraPermissions();
+
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+
+  function toggleCameraFacing() {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  }
+
   return (
-    <View style={styles.contentContainer}>
+    <View style={styles.container}>
+      <CameraView style={styles.camera} facing={facing} />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+          <Text style={styles.text}>Flip Camera</Text>
+        </TouchableOpacity>
+      </View>
       <Link href="/videoplay">Record video</Link>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
+   container: {
     flex: 1,
-    padding: 10,
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 50,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
   },
-  video: {
-    width: 350,
-    height: 200,
-    backgroundColor: '#000',
+  camera: {
+    flex: 1,
   },
-  controlsContainer: {
-    padding: 10,
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 64,
     flexDirection: 'row',
-    gap: 10,
+    backgroundColor: 'transparent',
+    width: '100%',
+    paddingHorizontal: 64,
   },
-  status: {
-    marginTop: 10,
-    fontSize: 14,
+  button: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
