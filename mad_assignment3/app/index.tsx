@@ -19,8 +19,8 @@ export default function VideoRecord() {
     return <View />;
   }
 
-  if (!cameraPermission.granted && !microphonePermission.granted) {
-    // Camera and microphone permissions are not granted yet.
+  if (!cameraPermission.granted || !microphonePermission.granted) {
+    // Camera or microphone permissions are not granted yet.
     return (
       <View style={styles.container}>
         <Text style={styles.message}>We need your permission to record audio and video.</Text>
@@ -31,12 +31,13 @@ export default function VideoRecord() {
   }
   
   const toggleRecord = () => {
+    setIsRecording(!isRecording);
+    
     if(cameraRef.current) {
       if(isRecording) {
         cameraRef.current.stopRecording();
       } 
       else {
-        setIsRecording(!isRecording);
         cameraRef.current.recordAsync();
       }
     }
