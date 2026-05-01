@@ -3,11 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { StyleSheet, View, Button, Text } from 'react-native';
-import { Link } from 'expo-router';
-
-const videoSource = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+import { Link, useLocalSearchParams } from 'expo-router';
 
 export default function VideoScreen() {
+
+  const { currentVideo } = useLocalSearchParams();
+
+  const videoSource = Array.isArray(currentVideo) 
+    ? currentVideo[0] 
+    : currentVideo ?? 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+
   const player = useVideoPlayer(videoSource, (player) => {
     player.loop = true;
   });

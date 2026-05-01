@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Button, Text, TouchableOpacity } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { CameraView, CameraType, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 
 
@@ -13,6 +13,8 @@ export default function VideoRecord() {
   const [isRecording, setIsRecording] = useState(false);
 
   const cameraRef = useRef<CameraView>(null);
+
+  const [currentVideo, setCurrentVideo] = useState(null);
 
   if (!cameraPermission || !microphonePermission) {
     // Camera and microphone permissions are still loading.
@@ -29,16 +31,19 @@ export default function VideoRecord() {
       </View>
     );
   }
-  
+
   const toggleRecord = () => {
     setIsRecording(!isRecording);
-    
+
     if(cameraRef.current) {
       if(isRecording) {
         cameraRef.current.stopRecording();
       } 
       else {
-        cameraRef.current.recordAsync();
+        cameraRef.current.recordAsync().then((recordedVideo) => {
+          console.log(recordedVideo);
+          setCurrentVideo(recordedVideo);
+        });
       }
     }
     
@@ -54,13 +59,16 @@ export default function VideoRecord() {
 
   return (
     <View style={styles.container}>
+      <Link href={{
+          pathname: "/videoplay",
+          params: { currentVideo: currentVideo?.uri }
+        }}>Watch recorded video</Link>
       <CameraView ref={cameraRef} mode="video" style={styles.camera} facing={facing} />
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={toggleRecord}>
           <Text style={styles.text}>{isRecording ? 'Stop Recording' : 'Record'}</Text>
         </TouchableOpacity>
       </View>
-      <Link href="/videoplay">Record video</Link>
     </View>
   );
 }
